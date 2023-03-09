@@ -5,6 +5,7 @@ const path = require("path")
 const app = express()
 
 const PRODUCT_DATA_FILE = path.join(__dirname, "server-product-data.json")
+const CART_DATA_FILE = path.join(__dirname, "server-cart-data.json")
 
 app.set("port", process.env.PORT || 3000)
 app.use(bodyParser.json())
@@ -22,6 +23,72 @@ app.get("/products", (req, res) => {
     fs.readFile(PRODUCT_DATA_FILE, (err, data) => {
         res.setHeader("Cache-Control", "no-cache")
         res.json(JSON.parse(data))
+    })
+})
+
+// get all products in cart
+app.get("/cart", (req, res) => {
+    fs.readFile(CART_DATA_FILE, (err, data) => {
+        res.setHeader("Cache-Control", "no-cache")
+        res.json(JSON.parse(data))
+    })
+})
+
+// add product to cart
+app.post("/cart", (req, res) => {
+    fs.readFile(CART_DATA_FILE, (err, data) => {
+        const cartProducts = JSON.parse(data)
+        const newCartProduct = {
+            id: req.body.id,
+            title: req.body.title,
+            description: req.body.description,
+            price: req.body.price,
+            quantity: 1,
+        }
+        let cartProductExists = false
+        cartProducts.map((cartProduct) => {
+            if (cartProduct.id === newCartProduct.id) {
+                cartProduct.quantity++
+                cartProductExists = true
+            }
+        })
+        if (!cartProductExists) cartProducts.push(newCartProduct)
+        fs.writeFile(
+            CART_DATA_FILE,
+            JSON.stringify(cartProducts, null, 4),
+            () => {
+                res.setHeader("Cache-Control", "no-cache")
+                res.json(cartProducts)
+            }
+        )
+    })
+})
+
+// remove product from cart by id
+app.delete("/cart/delete/:id", (req, res) => {
+    fs.readFile(CART_DATA_FILE, (err, data) => {
+        let cartProducts = JSON.parse(data)
+        cartProducts.map((cartProduct) => {
+            if (cartProduct.id === parseInt(req.params.id) && cartProduct.quantity > 1) {
+                cartProduct.quantity--
+            } 
+            else if (cartProduct.id === parseInt(req.params.id) && cartProduct.quantity === 1) {
+                // TODO: send data to sales team here
+
+                const cartIndexToRemove = cartProducts.findIndex(
+                    (cartProduct) => cartProduct.id === parseInt(req.params.id)
+                )
+                cartProducts.splice(cartIndexToRemove, 1)
+            }
+        })
+        fs.writeFile(
+            CART_DATA_FILE,
+            JSON.stringify(cartProducts, null, 4),
+            () => {
+                res.setHeader("Cache-Control", "no-cache")
+                res.json(cartProducts)
+            }
+        )
     })
 })
 

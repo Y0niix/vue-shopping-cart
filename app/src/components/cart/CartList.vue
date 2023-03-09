@@ -3,7 +3,7 @@
         <div class="md:flex ">
             <div class="w-full p-4 px-5 py-5">
                 <!-- if shopping cart empty -->
-                <div class="place-content-center my-20">
+                <div v-if="!cart.length" class="place-content-center my-20">
                     <div  class="text-center">
                         <p>Your shopping cart is empty!</p>
                         <router-link to="/" class="text-sm pr-2 mt-4 inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-emerald-500 rounded-lg hover:bg-emerald-600 focus:ring-4 focus:outline-none focus:ring-emerald-500">
@@ -16,11 +16,13 @@
                 </div>
 
                 <!-- else shopping cart length > 1 -->
-                <div class="md:grid md:grid-cols-3 gap-2 ">
+                <div v-else class="md:grid md:grid-cols-3 gap-2 ">
                     <div class="col-span-2 p-5">
                         <h1 class="text-xl font-medium ">Shopping Cart</h1>
 
-                        <!-- TODO: Add products in cart here in a v-for div -->
+                        <div v-for="product in cart" :key="product.id">
+                            <cart-details :product="product" />
+                        </div>
 
                         <!-- Continue shopping button and total -->
                         <div class="flex justify-between items-center mt-6 pt-6 border-t"> 
@@ -36,7 +38,7 @@
                             <div class="flex justify-center items-end align-center">
                                 <span class="text-sm font-medium text-gray-400 mr-1">Total:</span>
                                 <span class="text-lg font-bold text-gray-800 ">
-                                    <!-- TODO: add total price here -->
+                                    {{ cartTotalPrice }} €
                                 </span>
                             </div>
                         </div>
@@ -102,10 +104,19 @@
 </template>
 
 <script>
-import CartDetails from "./CartDetails.vue";
+import { mapGetters } from "vuex"
+import CartDetails from "./CartDetails.vue"
 
 export default {
     name: "CartList",
     components: { CartDetails },
+
+    computed: {
+        ...mapGetters(["cart", "cartTotalPrice", "cartQuantity"])
+    },
+
+    created() {
+        this.$store.dispatch("getCart")
+    },
 };
 </script>

@@ -20,6 +20,7 @@ const actions = {
 
 const getters = {
     products: (state) => state.products,
+    
     productById: (state) => (id) => {
         return state.products.find((product) => product.id === id)
     },
