@@ -7,12 +7,12 @@
         </div>
     </div>
 </template>
+
 <script>
-import Navbar from "./components/shared/Navbar.vue";
+import Navbar from "./components/shared/Navbar.vue"
+
 export default {
     name: "App",
-    components: {
-        Navbar,
-    },
+    components: { Navbar }
 };
 </script>
