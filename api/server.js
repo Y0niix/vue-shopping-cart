@@ -6,6 +6,7 @@ const app = express()
 
 const PRODUCT_DATA_FILE = path.join(__dirname, "server-product-data.json")
 const CART_DATA_FILE = path.join(__dirname, "server-cart-data.json")
+const SALES_TEAM_DATA_FILE = path.join(__dirname, "server-sales-team-data.json")
 
 app.set("port", process.env.PORT || 3000)
 app.use(bodyParser.json())
@@ -73,7 +74,15 @@ app.delete("/cart/delete/:id", (req, res) => {
                 cartProduct.quantity--
             } 
             else if (cartProduct.id === parseInt(req.params.id) && cartProduct.quantity === 1) {
-                // TODO: send data to sales team here
+                // Insert data in sales-team-data.json only if product.quantity become to 0
+                fs.readFile(SALES_TEAM_DATA_FILE, function (err, data) {
+                    var salesTeam = JSON.parse(data)
+                    salesTeam.push(cartProduct)
+                    fs.writeFile(SALES_TEAM_DATA_FILE, JSON.stringify(salesTeam), function(err){
+                      if (err) throw err;
+                      console.log('Data was appended to file for Sales team when product removed from cart.');
+                    });
+                })
 
                 const cartIndexToRemove = cartProducts.findIndex(
                     (cartProduct) => cartProduct.id === parseInt(req.params.id)
