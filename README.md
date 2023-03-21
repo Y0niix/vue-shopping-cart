@@ -32,3 +32,9 @@ Then go to api folder from another terminal and run
 ```bash
   npm start server.js
 ```
+
+
+## Results
+
+You'll find all products removed from cart in api/server-sales-team-data.json
+
